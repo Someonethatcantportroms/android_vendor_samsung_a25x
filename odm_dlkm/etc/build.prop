@@ -1,0 +1,21 @@
+####################################
+# from generate-common-build-props
+# These properties identify this partition image.
+####################################
+ro.product.odm_dlkm.brand=samsung
+ro.product.odm_dlkm.device=a25x
+ro.product.odm_dlkm.manufacturer=samsung
+ro.product.odm_dlkm.model=SM-A256E
+ro.product.odm_dlkm.name=a25xdxx
+ro.odm_dlkm.build.date=Sun May 10 15:50:50 +03 2026
+ro.odm_dlkm.build.date.utc=1778417450
+ro.odm_dlkm.build.fingerprint=samsung/a25xdxx/essi:15/AP3A.240905.015.A2/A256EXXS8CYG3:user/release-keys
+ro.odm_dlkm.build.id=BP4A.251205.006
+ro.odm_dlkm.build.tags=release-keys
+ro.odm_dlkm.build.type=user
+ro.odm_dlkm.build.version.incremental=1778417450
+ro.odm_dlkm.build.version.release=16
+ro.odm_dlkm.build.version.release_or_codename=16
+ro.odm_dlkm.build.version.sdk=36
+ro.odm_dlkm.build.version.sdk_full=36.1
+# end of file
