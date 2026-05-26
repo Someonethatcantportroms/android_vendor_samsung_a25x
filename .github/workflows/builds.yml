@@ -1,0 +1,71 @@
+name: Build LineageOS 23 for Galaxy A25
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Vendor Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Build Environment
+      run: |
+        sudo apt update
+        sudo apt install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git gnupg gperf libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
+        mkdir -p ~/bin
+        curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+        chmod a+x ~/bin/repo
+        git config --global user.name "John Doe"
+        git config --global user.email "someone@email.com"
+        
+    - name: Reassemble Split Vendor Files
+      run: |
+        echo "Reassembling Split lib64 files"
+        cat lib64_part_* > lib64.tar.gz
+        tar -xzf lib64.tar.gz
+        rm lib64_part_* lib64.tar.gz
+
+        echo "Reassembling Split tee files..."
+        cat tee_part_* > tee.tar.gz
+        tar -xzf tee.tar.gz
+        rm tee_part_* tee.tar.gz
+
+        echo "Extracting the rest of the folders that I have archived..."
+        tar -xzf bin.tar.gz && rm bin.tar.gz
+        tar -xzf etc.tar.gz && rm etc.tar.gz
+        tar -xzf firmware.tar.gz && rm firmware.tar.gz
+        tar -xzf lib.tar.gz && rm lib.tar.gz
+        echo "Vendor is done!"
+
+    - name: Download LineageOS 23 Source Code
+      run: |
+        export PATH=~/bin:$PATH
+        mkdir -p ~/android/lineage
+        cd ~/android/lineage
+        repo init -u https://github.com/LineageOS/android.git -b lineage-23.0 --git-lfs --depth=1
+        repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags
+      
+
+    - name: Link Device Tree and Kernel
+      run: |
+        cd ~/android/lineage
+        mkdir -p device/samsung/a25x
+        mkdir -p kernel/samsung/s5e8825
+        mkdir -p vendor/samsung/a25x
+        
+        # Copying forked sources to the OS
+        git clone https://github.com/Someonethatcantportroms/android_device_samsung_a25x device/samsung/a25x
+        git clone -b s5e8825-unified https://github.com/Someonethatcantportroms/android_kernel_samsung_s5e8825 kernel/samsung/s5e8825
+        cp -r $GITHUB_WORKSPACE/* vendor/samsung/a25x/
+        rm -rf vendor/samsung/a25x/.github
+
+    - name: Start the Android 16 Build
+      run: |
+        export PATH=~/bin:$PATH
+        cd ~/android/lineage
+        source build/envsetup.sh
+        lunch lineage_a25x-userdebug
+        mka bacon -j$(nproc --all)
+
